@@ -3,6 +3,28 @@ lvim.lsp.diagnostics.virtual_text = false
 lvim.builtin.notify.active = true
 lvim.builtin.terminal.active = true
 
+-- Set powershell as a shell
+-- Enable powershell as your default shell
+vim.opt.shell = "/opt/microsoft/powershell/7/pwsh -NoLogo"
+vim.opt.shellcmdflag =
+  "-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command [Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;"
+vim.cmd [[
+		let &shellredir = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
+		let &shellpipe = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
+		set shellquote= shellxquote=
+  ]]
+
+-- Set Syntax Highlighting
+local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+parser_config.powershell = {
+  install_info = {
+    url = "https://github.com/jrsconfitto/tree-sitter-powershell",
+    files = {"src/parser.c"}
+  },
+  filetype = "ps1",
+  used_by = { "psm1", "psd1", "pssc", "psxml", "cdxml" }
+}
+
 -- All the treesitter parsers you want to install. If you want all of them, just
 -- replace everything with "all".
 lvim.builtin.treesitter.ensure_installed = {

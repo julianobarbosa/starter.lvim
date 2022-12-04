@@ -1,25 +1,42 @@
 lvim.format_on_save = false
 lvim.lsp.diagnostics.virtual_text = false
-lvim.builtin.notify.active = true
 lvim.builtin.terminal.active = true
 
+-- Syntax highlightin
+-- https://www.lunarvim.org/docs/languages/powershell#install-syntax-highlighting
+local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+parser_config.powershell = {
+  install_info = {
+    url = "https://github.com/jrsconfitto/tree-sitter-powershell",
+    files = {"src/parser.c"}
+  },
+  filetype = "ps1",
+  used_by = { "psm1", "psd1", "pssc", "psxml", "cdxml" }
+}
+
+-- pwershell_es
+-- https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#powershell_es
+require'lspconfig'.powershell_es.setup{
+  bundle_path = '/opt/microsoft/PowerShellEditorServices',
+  shell = 'pwsh'
+}
+
 -- All the treesitter parsers you want to install. If you want all of them, just
--- replace everything with "all".
 lvim.builtin.treesitter.ensure_installed = {
-  "python",
+-- replace everything with "all".
 }
 
--- Set a formatter.
-local formatters = require "lvim.lsp.null-ls.formatters"
-formatters.setup {
-  { command = "black", filetypes = { "python" } },
-}
+-- -- Set a formatter.
+-- local formatters = require "lvim.lsp.null-ls.formatters"
+-- formatters.setup {
+--   { command = "black", filetypes = { "python" } },
+-- }
 
--- Set a linter.
-local linters = require "lvim.lsp.null-ls.linters"
-linters.setup {
-  { command = "flake8", filetypes = { "python" } },
-}
+-- -- Set a linter.
+-- local linters = require "lvim.lsp.null-ls.linters"
+-- linters.setup {
+--   { command = "flake8", filetypes = { "python" } },
+-- }
 
 -- TODO: debugpy installed by default
 -- Setup dap for python
@@ -93,6 +110,8 @@ lvim.builtin.which_key.mappings["P"] = {
 -- Additional Plugins
 lvim.plugins = {
   -- You can switch between vritual environmnts.
+  "pprovost/vim-ps1",
+  "JayDoubleu/vim-pwsh-formatter",
   "AckslD/swenv.nvim",
   "mfussenegger/nvim-dap-python",
   {

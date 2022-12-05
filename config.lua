@@ -1,6 +1,52 @@
 lvim.format_on_save = false
 lvim.lsp.diagnostics.virtual_text = false
 lvim.builtin.terminal.active = true
+lvim.builtin.which_key.active = true
+
+-- Set powershell as a shell
+-- Enable powershell as your default shell
+vim.opt.shell = "/opt/microsoft/powershell/7/pwsh -NoLogo"
+vim.opt.shellcmdflag =
+  "-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command [Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;"
+vim.cmd [[
+		let &shellredir = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
+		let &shellpipe = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
+		set shellquote= shellxquote=
+
+    augroup powershell
+        autocmd!
+        autocmd FileType ps1 setlocal errorformat=%EAt\ line:%l\ char:%c,
+            \%-C+%.%#,
+            \%Z%m,
+            \%-G\\s%#
+        if has('win32')
+            autocmd FileType ps1 set makeprg=pwsh\ -command\ \"&{
+                \trap{$_.tostring();continue}&{
+                \$c=gc\ '%';$c=[string]::join([environment]::newline,$c);
+                \[void]$executioncontext.invokecommand.newscriptblock($c)
+                \}
+            \}\"
+        else
+            autocmd FileType ps1 set makeprg=pwsh\ -command\ \"&{
+                \trap{\\$_.tostring\();continue}&{
+                \\\$c=gc\ '%';\\$c=[string]::join([environment]::newline,\\$c);
+                \[void]\\$executioncontext.invokecommand.newscriptblock(\\$c)
+                \}
+            \}\"
+        endif
+    augroup END
+  ]]
+
+-- Set Syntax Highlighting
+local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+parser_config.powershell = {
+  install_info = {
+    url = "https://github.com/jrsconfitto/tree-sitter-powershell",
+    files = {"src/parser.c"}
+  },
+  filetype = "ps1",
+  used_by = { "psm1", "psd1", "pssc", "psxml", "cdxml" }
+}
 
 -- Syntax highlightin
 -- https://www.lunarvim.org/docs/languages/powershell#install-syntax-highlighting
@@ -133,3 +179,4 @@ lvim.plugins = {
   -- You can run blocks of code like jupyter notebook.
   { "dccsillag/magma-nvim", run = ":UpdateRemotePlugins" },
 }
+

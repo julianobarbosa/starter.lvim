@@ -37,17 +37,6 @@ vim.cmd [[
     augroup END
   ]]
 
--- Set Syntax Highlighting
-local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-parser_config.powershell = {
-  install_info = {
-    url = "https://github.com/jrsconfitto/tree-sitter-powershell",
-    files = {"src/parser.c"}
-  },
-  filetype = "ps1",
-  used_by = { "psm1", "psd1", "pssc", "psxml", "cdxml" }
-}
-
 -- Syntax highlightin
 -- https://www.lunarvim.org/docs/languages/powershell#install-syntax-highlighting
 local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
@@ -63,7 +52,7 @@ parser_config.powershell = {
 -- pwershell_es
 -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#powershell_es
 require'lspconfig'.powershell_es.setup{
-  bundle_path = '/opt/microsoft/PowerShellEditorServices',
+  bundle_path = '/opt/microsoft/PowerShellEditorServices/PowerShellEditorServices/',
   shell = 'pwsh'
 }
 
@@ -122,6 +111,39 @@ vim.g.magma_cell_highlight_group = "CursorLine"
 -- postfixed with the extension .json.
 vim.g.magma_save_path = vim.fn.stdpath "data" .. "/magma"
 
+-- dap-powershell
+local dap = require('dap')
+dap.adapters.ps1 = {
+    type = 'executable';
+    name = 'powershell-debug';
+    command = "/usr/local/bin/start-dap-powershell.sh"
+}
+
+dap.configurations.ps1 = {
+  {
+    type = 'ps1';
+    request = 'launch';
+    name = "Launch powershell file";
+    program = "${file}";
+    powershellPath = function()
+      return '/bin/pwsh'
+    end;
+  }
+}
+
+dap.configurations.powershell_es = {
+  {
+    type = 'generic_remote',
+    name = 'Generic remote',
+    request = 'attach',
+    pathMappings = {{
+      -- Update this as needed
+      localRoot = vim.fn.getcwd();
+      remoteRoot = "/";
+    }}
+  };
+}
+
 -- Mappings
 lvim.builtin.which_key.mappings["dm"] = { "<cmd>lua require('dap-python').test_method()<cr>", "Test Method" }
 lvim.builtin.which_key.mappings["df"] = { "<cmd>lua require('dap-python').test_class()<cr>", "Test Class" }
@@ -156,6 +178,7 @@ lvim.builtin.which_key.mappings["P"] = {
 -- Additional Plugins
 lvim.plugins = {
   -- You can switch between vritual environmnts.
+  "Pocco81/DAPInstall.nvim",
   "pprovost/vim-ps1",
   "JayDoubleu/vim-pwsh-formatter",
   "AckslD/swenv.nvim",
